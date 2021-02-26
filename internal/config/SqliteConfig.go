@@ -15,6 +15,7 @@
 package config
 
 type SqliteConfig struct {
-	DatabaseFile string
-	TrueBatch    bool
+	DatabaseFile         string
+	TrueBatch            bool
+	EnableFTSCompression bool
 }

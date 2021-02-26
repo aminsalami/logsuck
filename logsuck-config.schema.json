@@ -28,7 +28,9 @@
             "type": "string"
           }
         },
-        "required": ["fileName"]
+        "required": [
+          "fileName"
+        ]
       }
     },
     "fieldExtractors": {
@@ -88,6 +90,10 @@
         },
         "trueBatch": {
           "description": "Whether Logsuck should use 'true batch' mode or not. True batch is significantly faster at saving events on average, but is slower at handling duplicates and relies on SQLite behavior which may not be guaranteed. Default true.",
+          "type": "boolean"
+        },
+        "EnableFTSCompression": {
+          "description": "Whether Logsuck should compress data when inserting raws to EventRaws table.Default false.",
           "type": "boolean"
         }
       }

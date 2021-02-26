@@ -47,10 +47,15 @@ func SqliteRepository(db *sql.DB, cfg *config.SqliteConfig) (Repository, error) 
 		return nil, fmt.Errorf("error creating events timestamp index: %w", err)
 	}
 	// It seems we have to use FTS4 instead of FTS5? - I could not find an option equivalent to order=DESC for FTS5 and order=DESC makes queries 8-9x faster...
-	_, err = db.Exec("CREATE VIRTUAL TABLE IF NOT EXISTS EventRaws USING fts4 (raw TEXT, source TEXT, host TEXT, order=DESC);")
+	if cfg.EnableFTSCompression {
+		_, err = db.Exec("CREATE VIRTUAL TABLE IF NOT EXISTS EventRaws USING fts4 (raw TEXT, source TEXT, host TEXT, order=DESC, compress=zip, uncompress=unzip);")
+	} else {
+		_, err = db.Exec("CREATE VIRTUAL TABLE IF NOT EXISTS EventRaws USING fts4 (raw TEXT, source TEXT, host TEXT, order=DESC);")
+	}
 	if err != nil {
 		return nil, fmt.Errorf("error creating eventraws table: %w", err)
 	}
+
 	return &sqliteRepository{
 		db:  db,
 		cfg: cfg,

@@ -30,7 +30,7 @@ import (
 	"github.com/jackbister/logsuck/internal/jobs"
 	"github.com/jackbister/logsuck/internal/web"
 
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/mattn/go-sqlite3"
 )
 
 var cfg = config.Config{
@@ -50,8 +50,9 @@ var cfg = config.Config{
 	},
 
 	SQLite: &config.SqliteConfig{
-		DatabaseFile: "logsuck.db",
-		TrueBatch:    true,
+		DatabaseFile:         "logsuck.db",
+		TrueBatch:            true,
+		EnableFTSCompression: false,
 	},
 
 	Web: &config.WebConfig{
@@ -158,10 +159,18 @@ func main() {
 	var jobEngine *jobs.Engine
 	var publisher events.EventPublisher
 	var repo events.Repository
+	var db *sql.DB
 	if cfg.Forwarder.Enabled {
 		publisher = events.ForwardingEventPublisher(&cfg)
 	} else {
-		db, err := sql.Open("sqlite3", cfg.SQLite.DatabaseFile+"?cache=shared&_journal_mode=WAL")
+		if cfg.SQLite.EnableFTSCompression {
+			sql.Register("sqlite3_with_compression", &sqlite3.SQLiteDriver{
+				Extensions: []string{"./compress"},
+			})
+			db, err = sql.Open("sqlite3_with_compression", cfg.SQLite.DatabaseFile+"?cache=shared&_journal_mode=WAL")
+		} else {
+			db, err = sql.Open("sqlite3", cfg.SQLite.DatabaseFile+"?cache=shared&_journal_mode=WAL")
+		}
 		if err != nil {
 			log.Fatalln(err.Error())
 		}

@@ -44,8 +44,9 @@ type jsonRecipientConfig struct {
 }
 
 type jsonSqliteConfig struct {
-	FileName  string `json:fileName`
-	TrueBatch *bool  `json:trueBatch`
+	FileName             string `json:fileName`
+	TrueBatch            *bool  `json:trueBatch`
+	EnableFTSCompression *bool  `json:enableFTSCompression`
 }
 
 type jsonWebConfig struct {
@@ -250,6 +251,12 @@ func FromJSON(r io.Reader) (*Config, error) {
 			sqlite.TrueBatch = true
 		} else {
 			sqlite.TrueBatch = *cfg.Sqlite.TrueBatch
+		}
+		if cfg.Sqlite.EnableFTSCompression == nil {
+			log.Println("Using default FTSCompression mode. default=false(no compression)")
+			sqlite.EnableFTSCompression = false
+		} else {
+			sqlite.EnableFTSCompression = true
 		}
 	}
 
